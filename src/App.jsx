@@ -16,7 +16,13 @@ function App() {
       )
       .then((res) => setInfo(res.data))
       .catch((err) => {
-        console.log(err);
+        if (err.response) {
+          console.log("Error en la respuesta:", err.response.data);
+        } else if (err.request) {
+          console.log("Error en la solicitud:", err.request);
+        } else {
+          console.log("Error:", err.message);
+        }
       });
   }, [city]);
 
