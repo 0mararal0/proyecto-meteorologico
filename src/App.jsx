@@ -1,35 +1,57 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
+import { NavbarApiWeather } from "./components/NavbarApiWeather";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { API_key } from "./services/apiKeys";
+import { CardApiWeather } from "./components/CardApiWeather";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [city, setCity] = useState("valladolid");
+  const [info, setInfo] = useState([]);
+  useEffect(() => {
+    axios
+      .get(
+        `http://api.openweathermap.org/data/2.5/forecast/?q=${city}&units=metrics&appid=${API_key}`
+      )
+      .then((res) => setInfo(res.data))
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [city]);
 
+  const onSearch = (text) => {
+    if (text) {
+      setCity(text.toLowerCase());
+    }
+  };
+  const prov = info?.list?.filter((ele) =>
+    ele?.dt_txt.slice(11, 13).includes("15")
+  );
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className="d-flex flex-wrap container-ppal">
+        <div className="navbar-ppal">
+          <NavbarApiWeather onSearch={onSearch} />
+        </div>
+        <div className="container-body">
+          <div className="title-ppal">
+            <h1>
+              Pronóstico del tiempo en <br />
+              <span className="city">{info?.city?.name}</span>
+            </h1>
+          </div>
+          <div className="container-cards">
+            {info &&
+              prov?.map((elem, idx) => {
+                return <CardApiWeather key={idx} data={elem} />;
+              })}
+          </div>
+          <div>{/* <Grafica /> */}</div>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
